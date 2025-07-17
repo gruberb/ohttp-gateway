@@ -1,7 +1,7 @@
 use axum::{
     body::Body,
     extract::{ConnectInfo, Request, State},
-    http::{header, HeaderMap, StatusCode},
+    http::{HeaderMap, StatusCode, header},
     middleware::Next,
     response::{IntoResponse, Response},
 };

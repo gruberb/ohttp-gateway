@@ -1,5 +1,5 @@
 use crate::{error::GatewayError, state::AppState};
-use axum::{extract::State, Json};
+use axum::{Json, extract::State};
 use serde_json::json;
 use std::time::Duration;
 

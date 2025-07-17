@@ -4,8 +4,8 @@ pub mod ohttp;
 
 use crate::state::AppState;
 use axum::{
-    routing::{get, post},
     Router,
+    routing::{get, post},
 };
 
 pub fn routes() -> Router<AppState> {

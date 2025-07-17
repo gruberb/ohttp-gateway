@@ -8,7 +8,7 @@ mod state;
 
 use crate::config::{AppConfig, LogFormat};
 use crate::state::AppState;
-use axum::{middleware as axum_middleware, Router};
+use axum::{Router, middleware as axum_middleware};
 use std::net::SocketAddr;
 use std::time::Duration;
 use tokio::net::TcpListener;
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn initialize_tracing(config: &AppConfig) {
-    use tracing_subscriber::{fmt, EnvFilter};
+    use tracing_subscriber::{EnvFilter, fmt};
 
     let env_filter =
         EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(&config.log_level));

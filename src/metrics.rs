@@ -1,4 +1,4 @@
-use prometheus::{register_counter, register_gauge, register_histogram, Counter, Gauge, Histogram};
+use prometheus::{Counter, Gauge, Histogram, register_counter, register_gauge, register_histogram};
 
 #[derive(Clone)]
 pub struct AppMetrics {

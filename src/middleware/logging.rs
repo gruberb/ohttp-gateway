@@ -1,6 +1,6 @@
 use axum::{body::Body, extract::Request, http::StatusCode, middleware::Next, response::Response};
 use std::time::Instant;
-use tracing::{info, warn, Instrument};
+use tracing::{Instrument, info, warn};
 use uuid::Uuid;
 
 pub async fn logging_middleware(
