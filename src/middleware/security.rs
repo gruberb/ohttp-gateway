@@ -174,15 +174,5 @@ pub async fn request_validation_middleware(
         }
     }
 
-    // Check for suspicious headers that might indicate attacks
-    const SUSPICIOUS_HEADERS: &[&str] = &["x-forwarded-host", "x-original-url", "x-rewrite-url"];
-
-    for header_name in SUSPICIOUS_HEADERS {
-        if headers.contains_key(*header_name) {
-            warn!("Request contains suspicious header: {}", header_name);
-            return Err(StatusCode::BAD_REQUEST);
-        }
-    }
-
     Ok(next.run(request).await)
 }
