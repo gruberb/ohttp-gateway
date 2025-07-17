@@ -1,0 +1,65 @@
+[package]
+name = "ohttp-gateway"
+authors = ["Bastian Gruber<foreach@me.com>"]
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+# Web framework and async runtime
+axum = { version = "0.7", features = ["macros"] }
+tokio = { version = "1", features = ["full"] }
+hyper = { version = "1", features = ["full"] }
+hyper-util = { version = "0.1", features = ["full"] }
+
+# HTTP client for backend requests
+reqwest = { version = "0.12", features = ["json", "stream"] }
+
+# OHTTP implementation - Using the martinthomson/ohttp crate
+ohttp = { version = "0.5", features = ["rust-hpke"] }
+bhttp = "0.5"
+
+# Middleware and utilities
+tower = "0.4"
+tower-http = { version = "0.6", features = [
+    "cors",
+    "trace",
+    "compression-br",
+    "timeout",
+] }
+
+# Serialization and configuration
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+config = "0.14"
+
+# Logging and observability
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+chrono = "0.4"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Metrics and monitoring
+prometheus = "0.13"
+axum-prometheus = "0.7"
+
+# Security and validation
+validator = { version = "0.18", features = ["derive"] }
+jsonwebtoken = "9.0"
+uuid = { version = "1.0", features = ["v4"] }
+
+# Async utilities
+tokio-util = "0.7"
+futures = "0.3"
+
+# Random number generation
+hex = "0.4"
+rand = "0.8"
+
+# Configuration management
+clap = { version = "4.0", features = ["derive", "env"] }
+
+[profile.release]
+lto = "fat"
