@@ -37,15 +37,6 @@ pub async fn get_ohttp_keys(State(state): State<AppState>) -> Result<Response, S
     }
 }
 
-/// Legacy endpoint for backward compatibility
-/// Some older clients may still use /ohttp-configs
-pub async fn get_legacy_ohttp_configs(
-    State(state): State<AppState>,
-) -> Result<Response, StatusCode> {
-    // Just forward to the main handler
-    get_ohttp_keys(State(state)).await
-}
-
 /// Calculate appropriate cache duration for key configurations
 fn calculate_cache_max_age(state: &AppState) -> u64 {
     // Cache for 10% of rotation interval, minimum 1 hour, maximum 24 hours
