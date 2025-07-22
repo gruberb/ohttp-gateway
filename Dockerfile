@@ -44,7 +44,7 @@ USER ohttp
 
 # Set default environment variables
 ENV RUST_LOG=debug,ohttp_gateway=debug
-ENV LISTEN_ADDR=0.0.0.0:8080
+ENV PORT=8000
 ENV BACKEND_URL=http://localhost:8000
 ENV REQUEST_TIMEOUT=30
 ENV KEY_ROTATION_ENABLED=false

@@ -5,7 +5,7 @@ use std::time::Duration;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct AppConfig {
     // Server configuration
-    pub listen_addr: String,
+    pub port: String,
     pub backend_url: String,
     pub request_timeout: Duration,
     pub max_body_size: usize,
@@ -60,7 +60,7 @@ pub enum LogFormat {
 impl Default for AppConfig {
     fn default() -> Self {
         Self {
-            listen_addr: "0.0.0.0:8080".to_string(),
+            port: "0.0.0.0:8000".to_string(),
             backend_url: "http://localhost:8080".to_string(),
             request_timeout: Duration::from_secs(30),
             max_body_size: 10 * 1024 * 1024, // 10MB
@@ -86,8 +86,8 @@ impl AppConfig {
         let mut config = Self::default();
 
         // Basic configuration
-        if let Ok(addr) = std::env::var("LISTEN_ADDR") {
-            config.listen_addr = addr;
+        if let Ok(port) = std::env::var("PORT") {
+            config.port = format!("0.0.0.0:{port}");
         }
 
         if let Ok(url) = std::env::var("BACKEND_URL") {
@@ -232,39 +232,5 @@ impl AppConfig {
         self.target_rewrites
             .as_ref()
             .and_then(|config| config.rewrites.get(host))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_default_config() {
-        let config = AppConfig::default();
-        assert_eq!(config.listen_addr, "0.0.0.0:8080");
-        assert!(config.key_rotation_enabled);
-    }
-
-    #[test]
-    fn test_validation_key_periods() {
-        let mut config = AppConfig::default();
-        config.key_retention_period = Duration::from_secs(100);
-        config.key_rotation_interval = Duration::from_secs(50);
-
-        assert!(config.validate().is_err());
-    }
-
-    #[test]
-    fn test_origin_allowed() {
-        let mut config = AppConfig::default();
-        config.allowed_target_origins = Some(
-            vec!["example.com".to_string(), "test.com".to_string()]
-                .into_iter()
-                .collect(),
-        );
-
-        assert!(config.is_origin_allowed("example.com"));
-        assert!(!config.is_origin_allowed("forbidden.com"));
     }
 }

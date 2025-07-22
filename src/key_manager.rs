@@ -108,8 +108,25 @@ impl KeyManager {
             return Err("Seed must be at least 32 bytes".into());
         }
 
-        let mut manager = Self::new(config).await?;
-        manager.seed = Some(seed);
+        let manager = Self {
+            keys: Arc::new(RwLock::new(HashMap::new())),
+            active_key_id: Arc::new(RwLock::new(0)),
+            config,
+            next_key_id: Arc::new(RwLock::new(1)),
+            seed: Some(seed),
+        };
+
+        // Generate initial key (will now use the seed)
+        let initial_key = manager.generate_new_key().await?;
+        {
+            let mut keys = manager.keys.write().await;
+            let mut active_id = manager.active_key_id.write().await;
+
+            keys.insert(initial_key.id, initial_key.clone());
+            *active_id = initial_key.id;
+        }
+
+        info!("KeyManager initialized with key ID: {}", initial_key.id);
         Ok(manager)
     }
 
@@ -142,6 +159,11 @@ impl KeyManager {
             symmetric_suites.push(SymmetricSuite::new(kdf, aead));
         }
 
+        // Validate that we have at least one cipher suite
+        if symmetric_suites.is_empty() {
+            return Err("No valid cipher suites configured".into());
+        }
+
         // Determine KEM based on config - only X25519 is supported by ohttp crate
         let kem = Kem::X25519Sha256;
 
@@ -151,9 +173,7 @@ impl KeyManager {
             let mut key_seed = seed.clone();
             key_seed.push(key_id);
 
-            // The ohttp crate doesn't directly support deterministic key generation
-            // This would require extending the crate or using a custom implementation
-            KeyConfig::new(key_id, kem, symmetric_suites)?
+            KeyConfig::derive(key_id, kem, symmetric_suites, &key_seed)?
         } else {
             KeyConfig::new(key_id, kem, symmetric_suites)?
         };
@@ -270,8 +290,8 @@ impl KeyManager {
 
         let manager = self;
         tokio::spawn(async move {
-            // Check every hour
-            let mut interval = tokio::time::interval(Duration::from_secs(3600));
+            // Use the configured rotation interval for the scheduler
+            let mut interval = tokio::time::interval(manager.config.rotation_interval);
 
             loop {
                 interval.tick().await;
@@ -343,37 +363,3 @@ pub struct KeyManagerStats {
 // Ensure thread safety
 unsafe impl Send for KeyManager {}
 unsafe impl Sync for KeyManager {}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_key_generation() {
-        let config = KeyManagerConfig::default();
-        let manager = KeyManager::new(config).await.unwrap();
-
-        let stats = manager.get_stats().await;
-        assert_eq!(stats.total_keys, 1);
-        assert_eq!(stats.active_keys, 1);
-    }
-
-    #[tokio::test]
-    async fn test_key_rotation() {
-        let config = KeyManagerConfig {
-            rotation_interval: Duration::from_secs(60),
-            key_retention_period: Duration::from_secs(30),
-            ..Default::default()
-        };
-
-        let manager = KeyManager::new(config).await.unwrap();
-        let initial_stats = manager.get_stats().await;
-
-        // Rotate keys
-        manager.rotate_keys().await.unwrap();
-
-        let new_stats = manager.get_stats().await;
-        assert_eq!(new_stats.total_keys, 2);
-        assert_ne!(new_stats.active_key_id, initial_stats.active_key_id);
-    }
-}

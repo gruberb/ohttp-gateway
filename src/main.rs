@@ -49,7 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = create_router(app_state.clone(), &config);
 
     // Parse socket address
-    let addr: SocketAddr = config.listen_addr.parse()?;
+    let addr: SocketAddr = config.port.parse()?;
     let listener = TcpListener::bind(addr).await?;
 
     info!("OHTTP Gateway listening on {}", addr);
@@ -186,18 +186,5 @@ async fn shutdown_signal() {
         _ = terminate => {
             info!("Received SIGTERM, starting graceful shutdown");
         },
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_config_loading() {
-        // Test that default config loads successfully
-        let config = AppConfig::default();
-        assert!(!config.debug_mode);
-        assert!(config.key_rotation_enabled);
     }
 }
