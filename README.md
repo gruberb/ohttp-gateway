@@ -109,7 +109,7 @@ export ALLOWED_TARGET_ORIGINS=httpbin.org
 
 ### Key Configuration
 
-- `GET /ohttp-keys` - Retrieve current key configuration
+- `GET /ohttp-configs` - Retrieve current key configuration
   - Returns `application/ohttp-keys` content type
   - Used by clients to obtain encryption keys
 
@@ -124,7 +124,7 @@ Clients need the key configuration to encrypt requests:
 
 ```bash
 # Fetch key configuration
-curl -H "Accept: application/ohttp-keys" https://gateway:8080/ohttp-keys
+curl -H "Accept: application/ohttp-keys" https://gateway:8080/ohttp-configs
 
 # Send OHTTP request (encrypted)
 curl -X POST \
