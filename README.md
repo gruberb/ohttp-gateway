@@ -10,6 +10,7 @@ OHTTP enables clients to make HTTP requests without revealing their identity to 
 
 ## Architecture
 
+```
 Client -> Relay -> Gateway -> Target Server
              |        |
              |        v
@@ -18,7 +19,7 @@ Client -> Relay -> Gateway -> Target Server
              |    [Encrypt Response]
              |        |
              <--------+
-
+```
 
 This implementation serves as the Gateway component, handling:
 - HPKE-encrypted request decapsulation
@@ -43,7 +44,7 @@ The gateway is configured via environment variables:
 
 ### Basic Configuration
 ```bash
-LISTEN_ADDR=0.0.0.0:8080                    # Server bind address
+PORT="8080"                                  # Server port
 BACKEND_URL=http://localhost:8080            # Default backend URL
 REQUEST_TIMEOUT=30                           # Request timeout in seconds
 MAX_BODY_SIZE=10485760                       # Maximum request body size (10MB)
