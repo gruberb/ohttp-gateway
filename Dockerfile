@@ -45,10 +45,10 @@ USER ohttp
 # Set default environment variables
 ENV RUST_LOG=debug,ohttp_gateway=debug
 ENV PORT=8000
-ENV BACKEND_URL=http://localhost:8000
+ENV BACKEND_URL=http://localhost:8080
 ENV REQUEST_TIMEOUT=30
 ENV KEY_ROTATION_ENABLED=false
 
-EXPOSE 8080
+EXPOSE 8000
 
 CMD ["ohttp-gateway"]
