@@ -1,6 +1,9 @@
+use bhttp::Message;
+use ohttp_gateway::GatewayError;
+use std::io::Cursor;
 use std::time::Duration;
 use tokio;
-
+use tracing::debug;
 // Your key manager module - adjust the import path as needed
 use ohttp_gateway::key_manager::{CipherSuiteConfig, KeyManager, KeyManagerConfig};
 
@@ -169,4 +172,31 @@ async fn test_cleanup_expired_keys() {
     let final_stats = manager.get_stats().await;
     // Should have cleaned up the expired key
     assert!(final_stats.total_keys <= 2);
+}
+
+#[tokio::test]
+async fn test_bhttp_parsing() {
+    // let data = &[
+    //     2, 3, 71, 69, 84, 5, 104, 116, 116, 112, 115, 9, 108, 111, 99, 97, 108, 104, 111, 115, 116,
+    //     4, 47, 103, 101, 116, 10, 117, 115, 101, 114, 45, 97, 103, 101, 110, 116, 21, 79, 72, 84,
+    //     84, 80, 45, 84, 101, 115, 116, 45, 67, 108, 105, 101, 110, 116, 47, 49, 46, 48, 6, 97, 99,
+    //     99, 101, 112, 116, 16, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 106, 115,
+    //     111, 110, 0, 0,
+    // ];
+    // let mut cursor = std::io::Cursor::new(data);
+    //
+    // let m = Message::read_bhttp(&mut cursor).unwrap();
+    //
+    // println!("TEST {:?}", m);
+
+    const REQUEST: &[u8] = &[
+        2, 3, 71, 69, 84, 5, 104, 116, 116, 112, 115, 9, 108, 111, 99, 97, 108, 104, 111, 115, 116,
+        4, 47, 103, 101, 116, 10, 117, 115, 101, 114, 45, 97, 103, 101, 110, 116, 21, 79, 72, 84,
+        84, 80, 45, 84, 101, 115, 116, 45, 67, 108, 105, 101, 110, 116, 47, 49, 46, 48, 6, 97, 99,
+        99, 101, 112, 116, 16, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 106, 115,
+        111, 110, 0, 0,
+    ];
+    let m = Message::read_bhttp(&mut Cursor::new(REQUEST)).unwrap();
+    println!("TEST {:?}", m);
+    assert!(m.header().get(b"accept").is_some());
 }

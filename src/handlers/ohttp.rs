@@ -90,6 +90,8 @@ async fn handle_ohttp_request_inner(
         GatewayError::DecryptionError(format!("Failed to decapsulate: {e}"))
     })?;
 
+    debug!("Request: {:#?}", bhttp_request);
+
     debug!(
         "Successfully decapsulated request, {} bytes",
         bhttp_request.len()
@@ -178,6 +180,8 @@ fn validate_ohttp_request(
 /// Parse binary HTTP message with error handling
 fn parse_bhttp_message(data: &[u8]) -> Result<Message, GatewayError> {
     let mut cursor = std::io::Cursor::new(data);
+    debug!("Cursor: std::io::Cursor::new(data): {:?}", cursor);
+
     Message::read_bhttp(&mut cursor)
         .map_err(|e| GatewayError::InvalidRequest(format!("Failed to parse binary HTTP: {e}")))
 }

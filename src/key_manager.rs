@@ -216,8 +216,7 @@ impl KeyManager {
             .config
             .encode()?;
 
-        let mut out = Vec::with_capacity(cfg_bytes.len() + 2);
-        out.extend_from_slice(&(cfg_bytes.len() as u16).to_be_bytes()); // 2-byte length
+        let mut out = Vec::with_capacity(cfg_bytes.len());
         out.extend_from_slice(&cfg_bytes);
         Ok(out)
     }

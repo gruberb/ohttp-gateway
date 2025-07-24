@@ -360,9 +360,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "bhttp"
-version = "0.5.4"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bc657efe5aa3821f1cacfb47665c32849e09820844bff9f5066227312829fa3"
+checksum = "16fc24bc615b9fd63148f59b218ea58a444b55762f8845da910e23aca686398b"
 dependencies = [
  "thiserror 1.0.69",
 ]
@@ -1806,9 +1806,9 @@ dependencies = [
 
 [[package]]
 name = "ohttp"
-version = "0.5.4"
+version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "10a20082b908632960d0aa59af61e2771502b40249d55986e8bdbcd06d723ea5"
+checksum = "622b8959bde5da6c70b0a49e8aa359e0c79c5e8ffd23eb3781c0cc575903d862"
 dependencies = [
  "aead 0.4.3",
  "aes-gcm 0.9.2",
@@ -1817,7 +1817,6 @@ dependencies = [
  "hex",
  "hkdf 0.11.0",
  "hpke",
- "lazy_static",
  "log",
  "rand",
  "serde",
@@ -1829,7 +1828,7 @@ dependencies = [
 
 [[package]]
 name = "ohttp-gateway"
-version = "0.2.0"
+version = "0.2.5"
 dependencies = [
  "anyhow",
  "axum",

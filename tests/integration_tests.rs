@@ -163,14 +163,14 @@ async fn test_config_serialization_format() {
     let encoded_config = manager.get_encoded_config().await.unwrap();
 
     // Verify basic structure: length prefix + config data
-    assert!(encoded_config.len() >= 4);
+    assert!(encoded_config.len() >= 2);
 
     let length = u16::from_be_bytes([encoded_config[0], encoded_config[1]]);
-    assert_eq!(length as usize, encoded_config.len() - 2);
+    assert_eq!(length as usize, encoded_config.len());
 
     // Verify it contains expected OHTTP key configuration elements
     // The exact format would depend on your implementation
-    let config_data = &encoded_config[2..];
+    let config_data = &encoded_config[..];
     assert!(!config_data.is_empty());
 }
 
