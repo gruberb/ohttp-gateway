@@ -1,11 +1,8 @@
 use bhttp::Message;
-use ohttp_gateway::GatewayError;
+use ohttp_gateway::key_manager::{CipherSuiteConfig, KeyManager, KeyManagerConfig};
 use std::io::Cursor;
 use std::time::Duration;
 use tokio;
-use tracing::debug;
-// Your key manager module - adjust the import path as needed
-use ohttp_gateway::key_manager::{CipherSuiteConfig, KeyManager, KeyManagerConfig};
 
 #[tokio::test]
 async fn test_key_generation() {
@@ -115,12 +112,14 @@ async fn test_get_encoded_config() {
 
     let encoded_config = manager.get_encoded_config().await.unwrap();
 
-    // Should have at least 4 bytes (2 bytes length + some config data)
-    assert!(encoded_config.len() >= 4);
+    // Should have some config data (no length prefix anymore)
+    assert!(!encoded_config.is_empty());
+    assert!(encoded_config.len() > 0);
 
-    // First 2 bytes should be length in big endian
-    let length = u16::from_be_bytes([encoded_config[0], encoded_config[1]]);
-    assert_eq!(length as usize, encoded_config.len() - 2);
+    // The encoded config should be the raw config bytes without length prefix
+    // We can't easily verify the exact content without duplicating the encoding logic,
+    // but we can at least verify it's reasonable in size
+    assert!(encoded_config.len() < 1000); // Reasonable upper bound
 }
 
 #[tokio::test]
@@ -194,9 +193,8 @@ async fn test_bhttp_parsing() {
         4, 47, 103, 101, 116, 10, 117, 115, 101, 114, 45, 97, 103, 101, 110, 116, 21, 79, 72, 84,
         84, 80, 45, 84, 101, 115, 116, 45, 67, 108, 105, 101, 110, 116, 47, 49, 46, 48, 6, 97, 99,
         99, 101, 112, 116, 16, 97, 112, 112, 108, 105, 99, 97, 116, 105, 111, 110, 47, 106, 115,
-        111, 110, 0, 0,
+        111, 110, 0, 0, 0,
     ];
     let m = Message::read_bhttp(&mut Cursor::new(REQUEST)).unwrap();
-    println!("TEST {:?}", m);
     assert!(m.header().get(b"accept").is_some());
 }
