@@ -206,7 +206,7 @@ impl KeyManager {
         keys.get(&key_id).map(|info| info.server.clone())
     }
 
-    /// Get encoded config for backward compatibility
+    /// Get encoded config with length prefix per RFC 9458 Section 3.2
     pub async fn get_encoded_config(&self) -> Result<Vec<u8>, Box<dyn std::error::Error>> {
         let keys = self.keys.read().await;
         let active_id = self.active_key_id.read().await;
@@ -216,7 +216,9 @@ impl KeyManager {
             .config
             .encode()?;
 
-        let mut out = Vec::with_capacity(cfg_bytes.len());
+        let mut out = Vec::with_capacity(2 + cfg_bytes.len());
+        // Add 2-byte length prefix in network byte order per RFC 9458
+        out.extend_from_slice(&(cfg_bytes.len() as u16).to_be_bytes());
         out.extend_from_slice(&cfg_bytes);
         Ok(out)
     }

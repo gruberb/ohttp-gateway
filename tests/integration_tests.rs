@@ -162,15 +162,19 @@ async fn test_config_serialization_format() {
 
     let encoded_config = manager.get_encoded_config().await.unwrap();
 
-    // Verify we have config data (no length prefix anymore)
+    // Verify we have config data with 2-byte length prefix per RFC 9458
     assert!(!encoded_config.is_empty());
-    assert!(encoded_config.len() > 10);
+    assert!(encoded_config.len() > 12); // At least 2 bytes for length + some config data
+
+    // Verify the length prefix is correct
+    let length_prefix = u16::from_be_bytes([encoded_config[0], encoded_config[1]]);
+    assert_eq!(length_prefix as usize, encoded_config.len() - 2);
 
     // Verify it contains reasonable OHTTP key configuration data
     assert!(encoded_config.len() < 1000); // Reasonable upper bound
 
-    // The config should be the raw encoded configuration
-    let config_data = &encoded_config;
+    // The config should be the length-prefixed encoded configuration
+    let config_data = &encoded_config[2..]; // Skip the length prefix
     assert!(!config_data.is_empty());
 }
 

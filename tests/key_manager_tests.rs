@@ -112,11 +112,15 @@ async fn test_get_encoded_config() {
 
     let encoded_config = manager.get_encoded_config().await.unwrap();
 
-    // Should have some config data (no length prefix anymore)
+    // Should have config data with 2-byte length prefix per RFC 9458
     assert!(!encoded_config.is_empty());
-    assert!(encoded_config.len() > 0);
+    assert!(encoded_config.len() > 2);
 
-    // The encoded config should be the raw config bytes without length prefix
+    // Verify the length prefix is correct
+    let length_prefix = u16::from_be_bytes([encoded_config[0], encoded_config[1]]);
+    assert_eq!(length_prefix as usize, encoded_config.len() - 2);
+
+    // The encoded config should be the length-prefixed config bytes
     // We can't easily verify the exact content without duplicating the encoding logic,
     // but we can at least verify it's reasonable in size
     assert!(encoded_config.len() < 1000); // Reasonable upper bound

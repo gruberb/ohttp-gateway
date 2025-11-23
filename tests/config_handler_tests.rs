@@ -1,4 +1,4 @@
-use hyper::StatusCode;
+use axum::http::StatusCode;
 use rand::Rng;
 
 use ohttp_gateway::{key_manager::KeyManager, key_manager::KeyManagerConfig};
@@ -90,9 +90,13 @@ async fn test_config_handler() {
     let cache_control = response.get_header("Cache-Control").unwrap();
     validate_cache_control_header(cache_control).unwrap();
 
-    // Check body is not empty and has expected structure
+    // Check body is not empty and has expected structure with 2-byte length prefix
     assert!(!response.body.is_empty());
-    assert!(response.body.len() >= 4); // At least length prefix + some config data
+    assert!(response.body.len() >= 4); // At least 2-byte length prefix + some config data
+
+    // Verify the length prefix is correct per RFC 9458
+    let length_prefix = u16::from_be_bytes([response.body[0], response.body[1]]);
+    assert_eq!(length_prefix as usize, response.body.len() - 2);
 }
 
 #[tokio::test]
