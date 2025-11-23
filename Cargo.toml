@@ -1,13 +1,13 @@
 [package]
 authors = ["Bastian Gruber <foreach@me.com>"]
-version = "0.2.5"
+version = "1.0.0"
 edition = "2024"
 name = "ohttp-gateway"
 categories = ["web-programming", "web-programming::http-server"]
 description = "A OHTTP Gateway server, meant to run between a OHTTP Relay and a target web service."
 documentation = "https://docs.rs/ohttp-gateway"
 keywords = ["ohttp", "gateway", "server", "privacy"]
-license = "MIT OR Apache-2.0"
+license = "MPL-2.0"
 readme = "README.md"
 repository = "https://github.com/gruberb/ohttp-gateway"
 
@@ -22,8 +22,8 @@ hyper-util = { version = "0.1", features = ["full"] }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 
 # OHTTP implementation - Using the martinthomson/ohttp crate
-ohttp = { version = "0.6", features = ["rust-hpke"] }
-bhttp = "0.6" 
+ohttp = { version = "0.7.1", features = ["rust-hpke"] }
+bhttp = "0.7.1"
 
 # Middleware and utilities
 tower = "0.4"

@@ -297,10 +297,10 @@ impl KeyManager {
             loop {
                 interval.tick().await;
 
-                if manager.should_rotate().await {
-                    if let Err(e) = manager.rotate_keys().await {
-                        error!("Key rotation failed: {}", e);
-                    }
+                if manager.should_rotate().await
+                    && let Err(e) = manager.rotate_keys().await
+                {
+                    error!("Key rotation failed: {}", e);
                 }
 
                 // Also clean up expired keys

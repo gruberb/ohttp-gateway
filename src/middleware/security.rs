@@ -164,13 +164,13 @@ pub async fn request_validation_middleware(
     }
 
     // Validate User-Agent
-    if let Some(user_agent) = headers.get(header::USER_AGENT) {
-        if let Ok(ua_str) = user_agent.to_str() {
-            // Block known bad user agents
-            if ua_str.is_empty() || ua_str.contains("bot") || ua_str.contains("crawler") {
-                info!("Blocked suspicious user agent: {}", ua_str);
-                return Err(StatusCode::FORBIDDEN);
-            }
+    if let Some(user_agent) = headers.get(header::USER_AGENT)
+        && let Ok(ua_str) = user_agent.to_str()
+    {
+        // Block known bad user agents
+        if ua_str.is_empty() || ua_str.contains("bot") || ua_str.contains("crawler") {
+            info!("Blocked suspicious user agent: {}", ua_str);
+            return Err(StatusCode::FORBIDDEN);
         }
     }
 
