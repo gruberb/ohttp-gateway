@@ -128,10 +128,10 @@ async fn handle_ohttp_request_inner(
         .map_err(|e| GatewayError::InternalError(format!("Response build error: {e}")))
 }
 
-/// Extract key ID from OHTTP request (first byte after version)
+/// Extract key ID from OHTTP request (first byte per RFC 9458)
 fn extract_key_id_from_request(body: &[u8]) -> Option<u8> {
-    // OHTTP request format: version(1) + key_id(1) + kem_id(2) + kdf_id(2) + aead_id(2) + enc + ciphertext
-    if body.len() > 1 { Some(body[1]) } else { None }
+    // OHTTP request format per RFC 9458: key_id(1) + kem_id(2) + kdf_id(2) + aead_id(2) + enc + ciphertext
+    if !body.is_empty() { Some(body[0]) } else { None }
 }
 
 /// Validate the incoming OHTTP request
@@ -466,7 +466,8 @@ mod tests {
 
     #[test]
     fn test_extract_key_id() {
-        let body = vec![0x00, 0x7F, 0x00, 0x01]; // version, key_id, kem_id...
+        // RFC 9458 format: key_id(1) + kem_id(2) + ...
+        let body = vec![0x7F, 0x00, 0x20, 0x00]; // key_id=0x7F, kem_id=0x0020...
         assert_eq!(extract_key_id_from_request(&body), Some(0x7F));
 
         let empty = vec![];
