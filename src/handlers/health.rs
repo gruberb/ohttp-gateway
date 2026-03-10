@@ -9,10 +9,11 @@ pub async fn health_check(
     let mut health_checks = vec![];
 
     // Check key manager health
-    let key_status = match state.key_manager.get_encoded_config().await {
-        Ok(config) if config.len() > 100 => "healthy",
-        Ok(_) => "unhealthy",
-        Err(_) => "unhealthy",
+    let stats = state.key_manager.get_stats().await;
+    let key_status = if stats.active_keys > 0 {
+        "healthy"
+    } else {
+        "unhealthy"
     };
 
     health_checks.push(json!({
@@ -20,31 +21,31 @@ pub async fn health_check(
         "status": key_status
     }));
 
-    // Check backend connectivity - use the correct health endpoint
-    let backend_health_url = format!("{}/health", state.config.backend_url);
-    let backend_status = match state
+    // Check backend connectivity - any HTTP response means reachable
+    let backend_url = state.config.backend_url.clone();
+    let (backend_status, backend_error) = match state
         .http_client
-        .get(&backend_health_url)
+        .head(&backend_url)
         .timeout(Duration::from_secs(5))
         .send()
         .await
     {
-        Ok(resp) if resp.status().is_success() => "healthy",
-        Ok(resp) => {
-            tracing::warn!("Backend health check returned: {}", resp.status());
-            "unhealthy"
-        }
+        Ok(_) => ("healthy", None),
         Err(e) => {
             tracing::error!("Backend health check failed: {}", e);
-            "unhealthy"
+            ("unhealthy", Some(e.to_string()))
         }
     };
 
-    health_checks.push(json!({
+    let mut backend_check = json!({
         "component": "backend",
         "status": backend_status,
-        "url": backend_health_url
-    }));
+        "url": backend_url
+    });
+    if let Some(err) = backend_error {
+        backend_check["error"] = json!(err);
+    }
+    health_checks.push(backend_check);
 
     let overall_status = if health_checks.iter().all(|c| c["status"] == "healthy") {
         "healthy"
