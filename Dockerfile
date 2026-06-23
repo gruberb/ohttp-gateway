@@ -1,6 +1,8 @@
 # Build stage
 FROM rust:1.88-slim as builder
 
+ARG RUST_TARGET_CPU=native
+
 WORKDIR /app
 
 # Install build dependencies
@@ -16,14 +18,14 @@ COPY Cargo.toml ./
 RUN mkdir src && echo "fn main() {}" > src/main.rs
 
 # Build dependencies
-RUN RUSTFLAGS="-C target-cpu=native" cargo build --release
+RUN RUSTFLAGS="-C target-cpu=${RUST_TARGET_CPU}" cargo build --release
 RUN rm -rf src
 
 # Copy source code
 COPY src ./src
 
 # Build the actual application
-RUN touch src/main.rs && RUSTFLAGS="-C target-cpu=native" cargo build --release
+RUN touch src/main.rs && RUSTFLAGS="-C target-cpu=${RUST_TARGET_CPU}" cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
