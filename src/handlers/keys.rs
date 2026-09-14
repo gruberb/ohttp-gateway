@@ -44,7 +44,14 @@ fn calculate_cache_max_age(state: &AppState) -> u64 {
     let one_hour = 3600;
     let twenty_four_hours = 86400;
 
-    ten_percent.max(one_hour).min(twenty_four_hours)
+    let max_age = ten_percent.max(one_hour).min(twenty_four_hours);
+
+    // Cap at 5 minutes for ephemeral (unseeded) keys to limit blast radius on restart
+    if state.config.seed_secret_key.is_none() {
+        max_age.min(300)
+    } else {
+        max_age
+    }
 }
 
 /// Health check endpoint specifically for key management

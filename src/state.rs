@@ -28,6 +28,11 @@ impl AppState {
             let seed = hex::decode(seed_hex)?;
             Arc::new(KeyManager::new_with_seed(key_manager_config, seed).await?)
         } else {
+            tracing::warn!(
+                "No SEED_SECRET_KEY configured. Keys are ephemeral and will be lost on restart. \
+                 Clients with cached key configs will get decryption errors after restart. \
+                 Set SEED_SECRET_KEY to a 64+ hex-char secret for production use."
+            );
             Arc::new(KeyManager::new(key_manager_config).await?)
         };
 
@@ -46,19 +51,7 @@ impl AppState {
 }
 
 fn get_cipher_suites(config: &AppConfig) -> Vec<CipherSuiteConfig> {
-    // Default cipher suites matching the Go implementation
-    let mut suites = vec![
-        CipherSuiteConfig {
-            kem: "X25519_SHA256".to_string(),
-            kdf: "HKDF_SHA256".to_string(),
-            aead: "AES_128_GCM".to_string(),
-        },
-        CipherSuiteConfig {
-            kem: "X25519_SHA256".to_string(),
-            kdf: "HKDF_SHA256".to_string(),
-            aead: "CHACHA20_POLY1305".to_string(),
-        },
-    ];
+    let mut suites = KeyManagerConfig::default().cipher_suites;
 
     // Add high-security suite if in production mode
     if !config.debug_mode {

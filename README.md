@@ -61,15 +61,26 @@ SEED_SECRET_KEY=hex_encoded_32_byte_seed     # Optional deterministic key genera
 ### Security
 ```bash
 ALLOWED_TARGET_ORIGINS=example.com,api.example.com  # Comma-separated allowed origins
+CORS_ALLOWED_ORIGINS=https://app.example.com,http://localhost:3000  # Browser origins
 TARGET_REWRITES='{"old.com":{"scheme":"https","host":"new.com"}}'  # JSON target rewrites
 RATE_LIMIT_RPS=100                           # Requests per second limit
 RATE_LIMIT_BURST=200                         # Burst size for rate limiting
 RATE_LIMIT_BY_IP=true                        # Rate limit by client IP
 ```
 
+`CORS_ALLOWED_ORIGINS` controls which browser origins may read gateway responses.
+Use exact HTTP(S) origins with a scheme, host, and optional port; paths, trailing
+slashes, and wildcards are rejected at startup. A configured list allows GET/POST
+with Content-Type/Accept headers and a one-hour preflight cache.
+
+For backward compatibility, leaving it unset retains `https://example.com` in
+production and permissive CORS in debug mode. Set it to an empty string to disable
+cross-origin access, including in debug mode. This setting is separate from
+`ALLOWED_TARGET_ORIGINS`, which restricts the backend hosts the gateway may contact.
+
 ### Operational
 ```bash
-METRICS_ENABLED=true                         # Enable Prometheus metrics
+METRICS_ENABLED=true                         # Legacy setting; metrics remain enabled
 GATEWAY_DEBUG=false                          # Enable debug mode
 LOG_FORMAT=json                              # Log format: json or default
 LOG_LEVEL=info                               # Log level: debug, info, warn, error

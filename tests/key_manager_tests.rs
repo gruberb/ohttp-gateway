@@ -1,8 +1,11 @@
 use bhttp::Message;
+use ohttp::{
+    SymmetricSuite,
+    hpke::{Aead, Kdf},
+};
 use ohttp_gateway::key_manager::{CipherSuiteConfig, KeyManager, KeyManagerConfig};
 use std::io::Cursor;
 use std::time::Duration;
-use tokio;
 
 #[tokio::test]
 async fn test_key_generation() {
@@ -144,9 +147,16 @@ async fn test_multiple_cipher_suites() {
         ..Default::default()
     };
 
+    let suites = [
+        SymmetricSuite::new(Kdf::HkdfSha256, Aead::Aes128Gcm),
+        SymmetricSuite::new(Kdf::HkdfSha256, Aead::ChaCha20Poly1305),
+    ];
     let manager = KeyManager::new(config).await.unwrap();
-    let stats = manager.get_stats().await;
-    assert_eq!(stats.total_keys, 1);
+    let encoded = manager.get_encoded_config().await.unwrap();
+    let key = ohttp::KeyConfig::decode(&encoded[2..]).unwrap();
+    for suite in suites {
+        assert!(key.select(suite).is_ok());
+    }
 }
 
 #[tokio::test]

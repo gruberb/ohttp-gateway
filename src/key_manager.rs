@@ -77,26 +77,7 @@ pub struct KeyManager {
 
 impl KeyManager {
     pub async fn new(config: KeyManagerConfig) -> Result<Self, Box<dyn std::error::Error>> {
-        let manager = Self {
-            keys: Arc::new(RwLock::new(HashMap::new())),
-            active_key_id: Arc::new(RwLock::new(0)),
-            config,
-            next_key_id: Arc::new(RwLock::new(1)),
-            seed: None,
-        };
-
-        // Generate initial key
-        let initial_key = manager.generate_new_key().await?;
-        {
-            let mut keys = manager.keys.write().await;
-            let mut active_id = manager.active_key_id.write().await;
-
-            keys.insert(initial_key.id, initial_key.clone());
-            *active_id = initial_key.id;
-        }
-
-        info!("KeyManager initialized with key ID: {}", initial_key.id);
-        Ok(manager)
+        Self::initialize(config, None).await
     }
 
     /// Create a key manager with a seed for deterministic key generation
@@ -104,7 +85,14 @@ impl KeyManager {
         config: KeyManagerConfig,
         seed: Vec<u8>,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        if seed.len() < 32 {
+        Self::initialize(config, Some(seed)).await
+    }
+
+    async fn initialize(
+        config: KeyManagerConfig,
+        seed: Option<Vec<u8>>,
+    ) -> Result<Self, Box<dyn std::error::Error>> {
+        if seed.as_ref().is_some_and(|seed| seed.len() < 32) {
             return Err("Seed must be at least 32 bytes".into());
         }
 
@@ -113,10 +101,10 @@ impl KeyManager {
             active_key_id: Arc::new(RwLock::new(0)),
             config,
             next_key_id: Arc::new(RwLock::new(1)),
-            seed: Some(seed),
+            seed,
         };
 
-        // Generate initial key (will now use the seed)
+        // Generate initial key
         let initial_key = manager.generate_new_key().await?;
         {
             let mut keys = manager.keys.write().await;
@@ -164,7 +152,7 @@ impl KeyManager {
             return Err("No valid cipher suites configured".into());
         }
 
-        // Determine KEM based on config - only X25519 is supported by ohttp crate
+        // All gateway keys use X25519.
         let kem = Kem::X25519Sha256;
 
         // Generate key config

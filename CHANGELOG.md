@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.2] - 2026-09-14
+
+### Added
+
+- `CORS_ALLOWED_ORIGINS` accepts comma-separated browser origins without code changes. An explicitly empty value disables cross-origin access; invalid origins fail at startup.
+- Tests for configured CORS, real key-handler responses and metrics, seeded restarts, and encrypted request round trips.
+
+### Changed
+
+- Removed 11 unused direct dependencies and obsolete mock-only test scaffolding.
+- Replaced yanked lockfile versions of `curve25519-dalek` and `slab` with compatible versions.
+- Shared key-manager initialization and reused the library modules in the executable.
+- Capped key-config caching at five minutes for ephemeral keys and added a startup warning when no seed is configured.
+
+### Compatibility
+
+- Preserved the 1.0.1 public structs, fields, constructors, serialization, and existing environment parsing.
+- Unset CORS preserves the existing production origin (`https://example.com`) and permissive debug behavior. Configured origins allow GET/POST and Content-Type/Accept headers, with a one-hour preflight cache.
+- Retained legacy configuration fields and cipher-suite wrappers for source compatibility.
+
 ## [1.0.1] - 2026-03-10
 
 ### Fixed
@@ -15,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2024-11-23
 
 ### Added
+
 - RFC 9458 compliant OHTTP gateway implementation
 - Automatic key rotation with configurable intervals
 - Key management with deterministic and random key generation

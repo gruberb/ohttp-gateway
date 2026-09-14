@@ -131,7 +131,11 @@ async fn handle_ohttp_request_inner(
 /// Extract key ID from OHTTP request (first byte per RFC 9458)
 fn extract_key_id_from_request(body: &[u8]) -> Option<u8> {
     // OHTTP request format per RFC 9458: key_id(1) + kem_id(2) + kdf_id(2) + aead_id(2) + enc + ciphertext
-    if !body.is_empty() { Some(body[0]) } else { None }
+    if !body.is_empty() {
+        Some(body[0])
+    } else {
+        None
+    }
 }
 
 /// Validate the incoming OHTTP request

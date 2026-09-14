@@ -2,36 +2,6 @@ use std::time::Duration;
 
 use ohttp_gateway::{key_manager::KeyManager, key_manager::KeyManagerConfig};
 
-mod common;
-use common::*;
-
-#[tokio::test]
-async fn test_end_to_end_encryption_decryption() {
-    let config = KeyManagerConfig::default();
-    let manager = KeyManager::new(config).await.unwrap();
-
-    // Get the server for decryption
-    let _ = manager.get_current_server().await.unwrap();
-
-    // Get the key config for client encryption
-    let encoded_config = manager.get_encoded_config().await.unwrap();
-
-    // Parse the config (this would normally be done by a real OHTTP client)
-    // For now, create a client with the current key config
-    let stats = manager.get_stats().await;
-    let _ = manager.get_server_by_id(stats.active_key_id).await.unwrap();
-
-    // Test message
-    let test_message = create_test_binary_http_message();
-
-    // This test verifies that encryption/decryption round trip works
-    // In a real implementation, you'd use the ohttp client/server APIs
-
-    // For now, just verify we can get the components we need
-    assert!(!encoded_config.is_empty());
-    assert!(!test_message.is_empty());
-}
-
 #[tokio::test]
 async fn test_key_rotation_during_requests() {
     let config = KeyManagerConfig {
@@ -134,25 +104,6 @@ async fn test_automatic_rotation_scheduler() {
     // Key should have rotated automatically
     // Note: This test might be flaky depending on timing
     assert!(final_stats.active_key_id != initial_stats.active_key_id || final_stats.total_keys > 1);
-}
-
-#[tokio::test]
-async fn test_metrics_tracking() {
-    let factory = MockMetricsFactory::new();
-
-    // Simulate various operations and metric collection
-    let metrics = factory.create("test_event".to_string()).await;
-
-    metrics.fire("operation_success").await;
-    metrics.response_status("test", 200).await;
-
-    assert!(metrics.contains_result("operation_success").await);
-    assert!(metrics.contains_result("test_response_status_200").await);
-
-    // Test the helper function
-    assert_metrics_contains_result(&factory, "test_event", "operation_success")
-        .await
-        .unwrap();
 }
 
 #[tokio::test]
