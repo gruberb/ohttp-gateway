@@ -95,6 +95,7 @@ docker build -t ohttp-gateway .
 
 # Run with basic configuration
 docker run -p 8080:8080 \
+  -e PORT=8080 \
   -e BACKEND_URL=https://httpbin.org \
   -e ALLOWED_TARGET_ORIGINS=httpbin.org \
   ohttp-gateway
@@ -248,3 +249,4 @@ cargo test
 ```bash
 cargo clippy
 cargo fmt
+```
