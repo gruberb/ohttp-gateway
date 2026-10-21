@@ -81,9 +81,7 @@ pub async fn security_middleware(
     let is_https = matches!(request.uri().scheme_str(), Some("https"));
 
     // Apply rate limiting if configured
-    if let Some(rate_limit_config) = &state.config.rate_limit {
-        let rate_limiter = RateLimiter::new(rate_limit_config.clone());
-
+    if let (Some(rate_limit_config), Some(rate_limiter)) = (&state.config.rate_limit, &state.rate_limiter) {
         let rate_limit_key = if rate_limit_config.by_ip {
             addr.ip().to_string()
         } else {

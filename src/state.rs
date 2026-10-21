@@ -2,6 +2,7 @@ use crate::{
     config::AppConfig,
     key_manager::{CipherSuiteConfig, KeyManager, KeyManagerConfig},
     metrics::AppMetrics,
+    middleware::security::RateLimiter,
 };
 use std::sync::Arc;
 
@@ -11,6 +12,8 @@ pub struct AppState {
     pub http_client: reqwest::Client,
     pub config: AppConfig,
     pub metrics: AppMetrics,
+    // Shared rate limiter, built once at startup so its token buckets persist across requests
+    pub rate_limiter: Option<Arc<RateLimiter>>,
 }
 
 impl AppState {
@@ -41,11 +44,17 @@ impl AppState {
 
         let metrics = AppMetrics::default();
 
+        let rate_limiter = config
+            .rate_limit
+            .clone()
+            .map(|rl| Arc::new(RateLimiter::new(rl)));
+
         Ok(Self {
             key_manager,
             http_client,
             config,
             metrics,
+            rate_limiter,
         })
     }
 }
